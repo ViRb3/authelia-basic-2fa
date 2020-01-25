@@ -1,7 +1,7 @@
 local sess = ngx.var.cookie_authelia_session
 local auth_header = ngx.req.get_headers()["authorization"]
 
---- disable basic auth so it doesn't take precedence over 2FA later on
+--- disable basic auth so it doesn't take precedence over 2FA
 ngx.req.clear_header("authorization")
 
 -- first try to see if the session is still valid
@@ -12,6 +12,9 @@ if sess ~= nil then
         ngx.exit(res.status)
     end
 end
+
+--- re-enable basic auth so it's not lost in case the script returns
+ngx.req.set_header("Authorization", auth_header)
 
 -- if not, try to use customized auth basic
 if auth_header == nil then
@@ -60,6 +63,9 @@ end
 local username = string.sub(user_pass[1], 0, #user_pass[1] - 1)
 local password = string.sub(user_pass[2], 0, #user_pass[2] - 6)
 local totp = string.sub(user_pass[2], -6)
+
+--- disable basic auth so it doesn't take precedence over 2FA
+ngx.req.clear_header("authorization")
 
 local res =
     ngx.location.capture(
