@@ -7,7 +7,13 @@ custom credentials format described [below](#format). This allows you to use 2FA
 that demand basic auth, e.g. [webdav](https://en.wikipedia.org/wiki/WebDAV) network streaming.
 
 ## Technical details
-2FA is achieved through basic auth through a [LUA](https://www.lua.org/about.html) script that runs before every authentication attempt with Authelia. The script will attempt to detect if the special credentials format is being used. If yes, it will decode them and execute standard Authelia 2FA authentication on behalf of the client using nginx subrequests. It will finally return the session cookie to the client, along with a status code `200` to go through the `auth_request`. If the client does not use the special credentials format or the format is invalid, the script will return and pass the whole request to the standard Authelia `verify` endpoint. 
+2FA is achieved through basic auth through a [LUA](https://www.lua.org/about.html) script that runs before every authentication attempt with Authelia.
+
+If the client has provided an Authelia session cookie, the script will first execute a subrequest to Authelia's `verify` endpoint to validate the session. If that succeeds, code `200` is returned directly.
+
+If the session is invalid or no such exists, the script will attempt to detect if the special credentials format is being used. If yes, it will decode them and execute standard Authelia 2FA authentication on behalf of the client using nginx subrequests. The script will finally return the session cookie to the client through a `Set-Cookie` header, along with a status code `200`.
+
+In all other cases, including when the client does not use the special credentials format or the format is invalid, the script will exit and pass the request to the standard Authelia `verify` endpoint. 
 
 ## Format
 The custom format combines the password and TOTP into the basic auth password field. To hint the backend you are attempting this 'special' form of authentication, you suffix your password with an underscore ( _ ). This can be changed in the [source code](legacy_2auth.lua).
