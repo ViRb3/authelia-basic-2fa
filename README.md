@@ -31,6 +31,7 @@ Configure your nginx/openresty instance to use the `.conf` files in this repo. C
 ## Notes
 - Make sure `Set-Cookie` headers can reach the client through `auth_request` or the client will always create a new session and lose access after the TOTP expires. Check `auth_request_set` in [auth.conf](auth.conf)
 - Make sure Authelia is aware of the real client IP or you may lock out your server on bruteforce attempts. Check `set_real_ip_from` in [auth.conf](auth.conf)
+- Your client (e.g. [VLC Player](https://www.videolan.org/vlc/)) must support cookies and use the session cookie on subsequent requests, since the basic auth password will become invalid after the TOTP expires
 
 ## TODO
 - Handle multiple headers with same name
