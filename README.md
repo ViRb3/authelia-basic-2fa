@@ -1,7 +1,7 @@
 # Authelia Basic Auth 2FA
 > Use Authelia 2FA through only standard basic auth
 
-## Description
+## Introduction
 This project allows you to use [Authelia](https://github.com/authelia/authelia)'s 2FA through only [basic auth](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) and a
 custom credentials format described [below](#format). This allows you to use 2FA on clients and scenarios
 that demand basic auth, e.g. [webdav](https://en.wikipedia.org/wiki/WebDAV) network streaming.
