@@ -1,3 +1,5 @@
+local cjson = require "cjson"
+
 local sess = ngx.var.cookie_authelia_session
 local auth_header = ngx.req.get_headers()["authorization"]
 
@@ -76,9 +78,17 @@ local res =
     }
 )
 
-if res.status ~= ngx.HTTP_OK then
+-- check request status
+if res.status ~= ngx.HTTP_OK or res.truncated then
     ngx.log(ngx.ERR, "failed first factor")
     ngx.exit(res.status)
+end
+
+-- check response message status
+local msg = cjson.decode(res.body)
+if msg["status"] ~= "OK" then
+    ngx.log(ngx.ERR, "failed first factor (2)")
+    ngx.exit(ngx.ERROR)
 end
 
 -- use the session cookie returned by first factor auth
@@ -102,16 +112,23 @@ local res =
     }
 )
 
-if res.status ~= ngx.HTTP_OK then
+-- check request status
+if res.status ~= ngx.HTTP_OK or res.truncated then
     ngx.log(ngx.ERR, "failed second factor")
     ngx.exit(res.status)
 end
 
+-- check response message status
+local msg = cjson.decode(res.body)
+if msg["status"] ~= "OK" then
+    ngx.log(ngx.ERR, "failed second factor (2)")
+    ngx.exit(ngx.ERROR)
+end
+
 -- check if we should grant access
--- the *factor endpoints above return 200 no matter auth result
 local res = ngx.location.capture("/api/verify", {method = ngx.HTTP_GET})
 if res.status ~= ngx.HTTP_OK then
-    ngx.log(ngx.ERR, "failed auth")
+    ngx.log(ngx.ERR, "failed auth verify")
     ngx.exit(res.status)
 end
 
