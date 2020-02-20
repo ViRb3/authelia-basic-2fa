@@ -11,7 +11,7 @@ if sess ~= nil then
     local res = ngx.location.capture("/api/verify", {method = ngx.HTTP_GET})
     if res.status == ngx.HTTP_OK then
         ngx.log(ngx.ERR, "valid session")
-        ngx.exit(res.status)
+        ngx.exit(ngx.HTTP_OK)
     end
 end
 
@@ -81,7 +81,7 @@ local res =
 -- check request status
 if res.status ~= ngx.HTTP_OK or res.truncated then
     ngx.log(ngx.ERR, "failed first factor")
-    ngx.exit(res.status)
+    ngx.exit(ngx.ERROR)
 end
 
 -- check response message status
@@ -115,7 +115,7 @@ local res =
 -- check request status
 if res.status ~= ngx.HTTP_OK or res.truncated then
     ngx.log(ngx.ERR, "failed second factor")
-    ngx.exit(res.status)
+    ngx.exit(ngx.ERROR)
 end
 
 -- check response message status
@@ -129,7 +129,7 @@ end
 local res = ngx.location.capture("/api/verify", {method = ngx.HTTP_GET})
 if res.status ~= ngx.HTTP_OK then
     ngx.log(ngx.ERR, "failed auth verify")
-    ngx.exit(res.status)
+    ngx.exit(ngx.ERROR)
 end
 
 -- bypasses proxy_pass
