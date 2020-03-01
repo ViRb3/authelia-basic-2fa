@@ -1,3 +1,5 @@
+> ## :warning: Warning: There are multiple problems with the approach described in this guide. A complete re-write is coming, please wait until is is ready.
+
 # Authelia Basic Auth 2FA
 > Use Authelia 2FA through only standard basic auth
 
