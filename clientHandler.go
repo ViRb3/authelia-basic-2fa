@@ -82,6 +82,7 @@ func (a *ClientHandler) cloneHeaders(req *http.Request) {
 	for key, values := range a.ctx.Request().Header {
 		keyStr := strings.ToLower(key)
 		if _, exists := util.PassHeaders[keyStr]; exists {
+			a.ctx.Logger().Debugf("Restoring header: %s, %v\n", key, values)
 			for _, value := range values {
 				req.Header.Set(key, value)
 			}
