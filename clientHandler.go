@@ -1,14 +1,15 @@
 package main
 
 import (
-	"authelia-basic-auth-2fa/authelia"
-	"authelia-basic-auth-2fa/util"
+	"authelia-basic-2fa/authelia"
+	"authelia-basic-2fa/util"
 	"bytes"
 	"encoding/json"
-	"github.com/labstack/echo/v4"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 // Used to impersonate the client when interacting with Authelia

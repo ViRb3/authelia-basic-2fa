@@ -1,4 +1,4 @@
-module authelia-basic-auth-2fa
+module authelia-basic-2fa
 
 go 1.13
 

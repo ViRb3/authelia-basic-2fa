@@ -1,9 +1,10 @@
 package main
 
 import (
-	"authelia-basic-auth-2fa/authelia"
+	"authelia-basic-2fa/authelia"
 	"flag"
 	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
