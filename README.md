@@ -1,5 +1,5 @@
 # Authelia Basic Auth 2FA
-> Use Authelia 2FA through only standard basic auth
+> Use Authelia 2-factor authentication through only standard basic auth
 
 ## Introduction
 This project allows you to use [Authelia](https://github.com/authelia/authelia)'s 2FA through only [basic auth](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) and a
