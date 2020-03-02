@@ -60,6 +60,7 @@ func checkAuthentication(ctx echo.Context) (bool, error) {
 	}()
 
 	ctx.Logger().Debug("Checking if user session is already valid")
+	// pass Authorization header to see if basic auth is valid
 	sessionValid, err := clientHandler.checkSession(true)
 	if err != nil {
 		return false, err
@@ -85,5 +86,6 @@ func checkAuthentication(ctx echo.Context) (bool, error) {
 		return false, err
 	}
 	ctx.Logger().Debug("Checking if new session is valid")
+	// don't pass Authorization header or it will override session
 	return clientHandler.checkSession(false)
 }
