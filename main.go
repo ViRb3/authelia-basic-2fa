@@ -44,10 +44,9 @@ func handleAuthentication(ctx echo.Context) error {
 	if authenticated {
 		ctx.Logger().Info("User authenticated")
 		return ctx.NoContent(200)
-	} else {
-		ctx.Logger().Info("User not authenticated")
-		return ctx.NoContent(401)
 	}
+	ctx.Logger().Info("User not authenticated")
+	return ctx.NoContent(401)
 }
 
 func checkAuthentication(ctx echo.Context) (bool, error) {
