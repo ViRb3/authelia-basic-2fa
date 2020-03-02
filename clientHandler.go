@@ -82,7 +82,7 @@ func (a *ClientHandler) cloneHeaders(req *http.Request) {
 	for key, values := range a.ctx.Request().Header {
 		keyStr := strings.ToLower(key)
 		if _, exists := util.PassHeaders[keyStr]; exists {
-			a.ctx.Logger().Debugf("Restoring header: %s, %v\n", key, values)
+			a.ctx.Logger().Debugf("Restoring header: %s, %v", key, values)
 			for _, value := range values {
 				req.Header.Set(key, value)
 			}
@@ -93,7 +93,7 @@ func (a *ClientHandler) cloneHeaders(req *http.Request) {
 // Saves response cookies to ClientHandler, overwriting old ones with same name
 func (a *ClientHandler) saveCookies(resp *http.Response) {
 	for _, cookie := range resp.Cookies() {
-		a.ctx.Logger().Debugf("Saving proxy cookie: %+v\n", cookie)
+		a.ctx.Logger().Debugf("Saving proxy cookie: %+v", cookie)
 		a.proxyCookies[cookie.Name] = cookie
 	}
 }
@@ -103,12 +103,12 @@ func (a *ClientHandler) restoreCookies(req *http.Request) {
 	for _, cookie := range a.clientCookies {
 		// allow proxyCookies to override clientCookies
 		if _, exists := a.proxyCookies[cookie.Name]; !exists {
-			a.ctx.Logger().Debugf("Restoring client cookie: %+v\n", cookie)
+			a.ctx.Logger().Debugf("Restoring client cookie: %+v", cookie)
 			req.AddCookie(cookie)
 		}
 	}
 	for _, cookie := range a.proxyCookies {
-		a.ctx.Logger().Debugf("Restoring proxy cookie: %+v\n", cookie)
+		a.ctx.Logger().Debugf("Restoring proxy cookie: %+v", cookie)
 		req.AddCookie(cookie)
 	}
 }

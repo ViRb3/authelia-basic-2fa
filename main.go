@@ -55,7 +55,7 @@ func checkAuthentication(ctx echo.Context) (bool, error) {
 	// apply all proxyCookies to the response, e.g. newly created Authelia session
 	defer func() {
 		for _, cookie := range clientHandler.proxyCookies {
-			ctx.Logger().Debugf("Applying proxy cookie: %+v\n", cookie)
+			ctx.Logger().Debugf("Applying proxy cookie: %+v", cookie)
 			ctx.SetCookie(cookie)
 		}
 	}()
