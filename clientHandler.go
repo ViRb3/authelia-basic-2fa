@@ -39,24 +39,24 @@ func (a *ClientHandler) checkFirstFactor(credentials *Credentials) (bool, error)
 		Username:       credentials.Username,
 		Password:       credentials.Password,
 		KeepMeLoggedIn: false,
-	}, authelia.FirstFactorUrl)
+	}, authelia.FirstFactorUrl, false)
 }
 
 // Performs TOTP second factor authentication with Authelia and returns the JSON response status
 func (a *ClientHandler) checkTOTP(credentials *Credentials) (bool, error) {
 	return a.doStatusPost(&authelia.TOTPRequest{
 		Token: credentials.TOTP,
-	}, authelia.TOTPUrl)
+	}, authelia.TOTPUrl, false)
 }
 
 // Performs a POST request to an Authelia endpoint and returns the JSON response status
-func (a *ClientHandler) doStatusPost(data interface{}, endpoint string) (bool, error) {
+func (a *ClientHandler) doStatusPost(data interface{}, endpoint string, includeAuthorization bool) (bool, error) {
 	jsonBody, err := json.Marshal(data)
 	if err != nil {
 		return false, err
 	}
 
-	resp, err := a.doRequest(endpoint, "POST", jsonBody)
+	resp, err := a.doRequest(endpoint, "POST", jsonBody, includeAuthorization)
 	if err != nil || resp.StatusCode != 200 {
 		return false, err
 	}
@@ -75,14 +75,26 @@ func (a *ClientHandler) doStatusPost(data interface{}, endpoint string) (bool, e
 }
 
 // Adds filtered headers from the client's original request to a sub-request
-func (a *ClientHandler) cloneHeaders(req *http.Request) {
+func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization bool) {
 	// clone host, per
 	req.Host = a.ctx.Request().Host
+
 	// clone headers
 	for key, values := range a.ctx.Request().Header {
 		keyStr := strings.ToLower(key)
+		if keyStr == "authorization" && !includeAuthorization {
+			continue
+		}
+
 		if _, exists := util.PassHeaders[keyStr]; exists {
 			a.ctx.Logger().Debugf("Restoring header: %s, %v", key, values)
+
+			// Authelia expects Proxy-Authorization
+			// https://github.com/authelia/authelia/blob/829757d3bc8196d6520f24479370a9037fbdb4de/internal/handlers/handler_verify.go#L232
+			if keyStr == "authorization" {
+				key = "Proxy-Authorization"
+			}
+
 			for _, value := range values {
 				req.Header.Set(key, value)
 			}
@@ -118,13 +130,14 @@ func (a *ClientHandler) restoreCookies(req *http.Request) {
 }
 
 // Performs a request to an Authelia endpoint
-func (a *ClientHandler) doRequest(requestUri string, requestMethod string, jsonBody []byte) (*http.Response, error) {
+func (a *ClientHandler) doRequest(
+	requestUri string, requestMethod string, jsonBody []byte, includeAuthorization bool) (*http.Response, error) {
 	req, err := http.NewRequest(requestMethod, requestUri, bytes.NewReader(jsonBody))
 	if err != nil {
 		return nil, err
 	}
 
-	a.cloneHeaders(req)
+	a.cloneHeaders(req, includeAuthorization)
 	a.restoreCookies(req)
 
 	if jsonBody != nil {
@@ -141,8 +154,8 @@ func (a *ClientHandler) doRequest(requestUri string, requestMethod string, jsonB
 }
 
 // Checks if the client has a valid Authelia session
-func (a *ClientHandler) checkSession() (bool, error) {
-	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil)
+func (a *ClientHandler) checkSession(includeAuthorization bool) (bool, error) {
+	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, includeAuthorization)
 	if err != nil {
 		return false, err
 	}

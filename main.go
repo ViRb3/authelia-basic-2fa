@@ -60,7 +60,7 @@ func checkAuthentication(ctx echo.Context) (bool, error) {
 	}()
 
 	ctx.Logger().Debug("Checking if user session is already valid")
-	sessionValid, err := clientHandler.checkSession()
+	sessionValid, err := clientHandler.checkSession(true)
 	if err != nil {
 		return false, err
 	}
@@ -85,5 +85,5 @@ func checkAuthentication(ctx echo.Context) (bool, error) {
 		return false, err
 	}
 	ctx.Logger().Debug("Checking if new session is valid")
-	return clientHandler.checkSession()
+	return clientHandler.checkSession(false)
 }
