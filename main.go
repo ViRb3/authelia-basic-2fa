@@ -20,6 +20,7 @@ func main() {
 	listenAddress := fmt.Sprintf("%s:%d", *ip, *port)
 
 	e := echo.New()
+	e.HideBanner = true
 	if *debug {
 		e.Logger.SetLevel(log.DEBUG)
 	} else {
