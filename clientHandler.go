@@ -86,6 +86,8 @@ func (a *ClientHandler) cloneHeaders(req *http.Request) {
 			for _, value := range values {
 				req.Header.Set(key, value)
 			}
+		} else {
+			a.ctx.Logger().Debugf("NOT restoring header: %s, %v", key, values)
 		}
 	}
 }
@@ -105,6 +107,8 @@ func (a *ClientHandler) restoreCookies(req *http.Request) {
 		if _, exists := a.proxyCookies[cookie.Name]; !exists {
 			a.ctx.Logger().Debugf("Restoring client cookie: %+v", cookie)
 			req.AddCookie(cookie)
+		} else {
+			a.ctx.Logger().Debugf("NOT restoring client cookie (proxy cookie override): %+v", cookie)
 		}
 	}
 	for _, cookie := range a.proxyCookies {
