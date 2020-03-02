@@ -16,6 +16,7 @@ func init() {
 		"X-Forwarded-Uri",
 		"X-Forwarded-Ssl",
 		"Connection",
+		// allow e.g. basic auth
 		"Authorization",
 	}
 	for _, header := range headers {
