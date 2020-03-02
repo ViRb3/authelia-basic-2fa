@@ -53,7 +53,10 @@ Run with argument `-help`:
     Authelia URL to use for authentication (default "http://authelia:9091")
 ```
 
-## Notes
-- Make sure `Set-Cookie` headers can reach the client through `auth_request` or the client will always create a new session and lose access after the TOTP expires. Check `auth_request_set` in [auth.conf](auth.conf)
-- Make sure Authelia is aware of the real client IP or you may lock out your server on bruteforce attempts. Check `set_real_ip_from` in [auth.conf](auth.conf)
+## :warning: Security notes
+- Make sure you are setting all reverse proxy headers from [passHeaders.go](util/passHeaders.go) in your nginx configuration, as shown in [authelia-proxy.conf](docker/nginx/data/authelia-proxy.conf). This project will pass all the headers listed above from the client to Authelia, allowing an attacker to spoof them if nginx is not present.
+
+## Other notes
+- Make sure `Set-Cookie` headers can reach the client through `auth_request` or the client will always create a new session and lose access after the TOTP expires. Check `auth_request_set` in [auth.conf](docker/nginx/data/auth.conf)
+- Make sure Authelia is aware of the real client IP or you may lock out your server on bruteforce attempts. Check `set_real_ip_from` in [authelia-proxy.conf](docker/nginx/data/authelia-proxy.conf)
 - Your client (e.g. [VLC Player](https://www.videolan.org/vlc/)) must support cookies and use the session cookie on subsequent requests, since the basic auth password will become invalid after the TOTP expires
