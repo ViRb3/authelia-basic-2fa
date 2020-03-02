@@ -40,6 +40,19 @@ The custom format combines the password and TOTP into the basic auth password fi
 ## Installation
 Check out the [Docker guide](docker). If you do not use Docker, you can still extract the configuration and use it directly.
 
+## Usage
+Run with argument `-help`:
+```bash
+-debug
+    Debug logging
+-ip string
+    Listening ip (default "0.0.0.0")
+-port int
+    Listening port (default 8081)
+-url string
+    Authelia URL to use for authentication (default "http://authelia:9091")
+```
+
 ## Notes
 - Make sure `Set-Cookie` headers can reach the client through `auth_request` or the client will always create a new session and lose access after the TOTP expires. Check `auth_request_set` in [auth.conf](auth.conf)
 - Make sure Authelia is aware of the real client IP or you may lock out your server on bruteforce attempts. Check `set_real_ip_from` in [auth.conf](auth.conf)
