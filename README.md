@@ -1,4 +1,4 @@
-> ## :warning: Warning: There are multiple problems with the approach described in this guide. A complete re-write is coming, please wait until is is ready.
+> ## :warning: Warning: There are multiple problems with the approach described in this guide. You are _strongly_ advised to upgrade to the new version [here](https://github.com/ViRb3/authelia-basic-2fa/tree/v2).
 
 # Authelia Basic Auth 2FA
 > Use Authelia 2FA through only standard basic auth
