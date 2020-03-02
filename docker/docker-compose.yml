@@ -1,0 +1,42 @@
+---
+version: "3.7"
+
+services:
+  nginx:
+    image: local/nginx
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - authelia
+      - authelia-basic-2fa
+    restart: unless-stopped
+    logging:
+      driver: journald
+    init: true
+
+  authelia: # port 9091
+    image: local/authelia
+    build: ./authelia
+    container_name: authelia
+    volumes:
+      - authelia-data:/etc/authelia
+      - authelia-var:/var/lib/authelia
+    restart: unless-stopped
+    logging:
+      driver: journald
+
+  authelia-basic-2fa: # port 8081
+    image: local/authelia-basic-2fa
+    build: ./authelia-basic-2fa
+    container_name: authelia-basic-2fa
+    restart: unless-stopped
+    logging:
+      driver: journald
+    init: true
+
+volumes:
+  authelia-data:
+  authelia-var:
