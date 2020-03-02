@@ -3,7 +3,7 @@ LABEL Name=local/authelia-basic-2fa
 
 ARG NAMESPACE=ViRb3
 ARG PROJECT=authelia-basic-2fa
-ARG VERSION=2.0.2
+ARG VERSION=<put_version_here>
 ARG ARCH=arm64
 
 RUN apk --no-cache add wget
