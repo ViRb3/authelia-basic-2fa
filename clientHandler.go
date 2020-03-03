@@ -86,7 +86,7 @@ func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization boo
 			continue
 		}
 
-		if _, exists := util.PassHeaders[keyStr]; exists {
+		if _, exists := util.HeaderWhitelist[keyStr]; exists {
 			a.ctx.Logger().Debugf("Restoring header: %s, %v", key, values)
 
 			// Authelia expects Proxy-Authorization

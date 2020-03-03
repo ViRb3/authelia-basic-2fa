@@ -3,7 +3,7 @@ package util
 import "strings"
 
 // Headers that should be passed from the client to sub-requests to Authelia
-var PassHeaders = map[string]bool{}
+var HeaderWhitelist = map[string]bool{}
 
 func init() {
 	// taken from official nginx guide:
@@ -20,6 +20,6 @@ func init() {
 		"Authorization",
 	}
 	for _, header := range headers {
-		PassHeaders[strings.ToLower(header)] = true
+		HeaderWhitelist[strings.ToLower(header)] = true
 	}
 }
