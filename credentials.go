@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/base64"
 	"errors"
-	"github.com/labstack/echo/v4"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 // Decodes credentials from the client's request using the custom format
@@ -33,14 +34,10 @@ func DecodeCredentials(ctx echo.Context) (*Credentials, error) {
 	username := authSplit[0]
 	password := authSplit[1]
 
-	if len(username) < 2 || !strings.Contains(username, "_") {
-		return nil, errors.New("unrecognized user format or not special auth")
-	}
 	if len(password) < 7 {
-		return nil, errors.New("unrecognized pass format")
+		return nil, errors.New("unrecognized pass format or not special auth")
 	}
 
-	username = username[:len(username)-1]
 	totp := password[len(password)-6:]
 	password = password[:len(password)-6]
 

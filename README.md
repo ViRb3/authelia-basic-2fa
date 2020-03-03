@@ -24,7 +24,7 @@ If that fails, the proxy will attempt to detect if the special credentials forma
 In all other cases, including when the client does not use the special credentials format or the format is invalid, this proxy will return a status code `401`.
 
 ## Format
-The custom format combines the password and TOTP into the basic auth password field. To hint the backend you are attempting this 'special' form of authentication, you suffix your password with an underscore ( _ ). This can be changed in the [source code](credentials.go).
+The custom format combines the password and TOTP into the basic auth password field. Example:
 
 ### Original credentials
 - Username: `john`
@@ -32,7 +32,7 @@ The custom format combines the password and TOTP into the basic auth password fi
 - TOTP: `123456`
 
 ### New credentials
-- Username: `john_`
+- Username: `john`
 - Password: `secret123456`
 
 ## Requirements
