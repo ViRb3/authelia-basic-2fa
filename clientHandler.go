@@ -153,9 +153,24 @@ func (a *ClientHandler) doRequest(
 	return resp, nil
 }
 
+// Checks if the client has valid Authorization
+func (a *ClientHandler) checkAuthorization() (bool, error) {
+	if a.ctx.Request().Header.Get("authorization") == "" {
+		return false, nil
+	}
+	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, true)
+	if err != nil {
+		return false, err
+	}
+	return resp.StatusCode == 200, nil
+}
+
 // Checks if the client has a valid Authelia session
-func (a *ClientHandler) checkSession(includeAuthorization bool) (bool, error) {
-	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, includeAuthorization)
+func (a *ClientHandler) checkSession() (bool, error) {
+	if _, err := a.ctx.Request().Cookie("authelia_session"); err == http.ErrNoCookie {
+		return false, nil
+	}
+	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, false)
 	if err != nil {
 		return false, err
 	}
