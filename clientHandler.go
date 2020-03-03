@@ -177,8 +177,10 @@ func (a *ClientHandler) checkAuthorization() (bool, error) {
 
 // Checks if the client has a valid Authelia session
 func (a *ClientHandler) checkSession() (bool, error) {
-	if _, err := a.ctx.Request().Cookie("authelia_session"); err == http.ErrNoCookie {
-		return false, nil
+	if _, exists := a.clientCookies["authelia_session"]; !exists {
+		if _, exists := a.proxyCookies["authelia_session"]; !exists {
+			return false, nil
+		}
 	}
 	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, false)
 	if err != nil {
