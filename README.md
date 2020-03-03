@@ -15,9 +15,11 @@ This is a complete re-code of the original LUA script into a Go reverse proxy, f
 You ---> nginx (or other reverse proxy) ---> this reverse proxy --> Authelia
 ```
 
-If the client has provided an Authelia session cookie, this proxy will first execute a sub-request to Authelia's `verify` endpoint to validate the session. If that succeeds, code `200` is returned directly.
+This proxy will clone the client's request headers and cookies based on a whitelist, and use them to negotiate authentication with Authelia on the client's behalf.
 
-If the session is invalid or no such exists, this proxy will attempt to detect if the special credentials format is being used. If yes, it will decode them and execute standard Authelia 2FA authentication on behalf of the client using sub-requests. this proxy will finally return the session cookie to the client through a `Set-Cookie` header, along with a status code `200`.
+The proxy will first execute a sub-request to Authelia's `verify` endpoint to check if the client has a valid session cookie or authorization (e.g. basic auth). If that succeeds, code `200` is returned to the client directly.
+
+If that fails, the proxy will attempt to detect if the special credentials format is being used. If yes, it will decode the credentials (which include the TOTP) and execute standard Authelia 2FA TOTP authentication. The proxy will then verify the newly obtained session, and, if valid, return the session cookie to the client through a `Set-Cookie` header, along with a status code `200`.
 
 In all other cases, including when the client does not use the special credentials format or the format is invalid, this proxy will return a status code `401`.
 
