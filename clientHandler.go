@@ -24,7 +24,13 @@ func NewClientHandler(ctx echo.Context) *ClientHandler {
 	clientCookies := map[string]*http.Cookie{}
 	// save client's cookies (e.g. Authelia session) to use for sub-requests
 	for _, cookie := range ctx.Cookies() {
-		clientCookies[cookie.Name] = cookie
+		// ignore non-whitelisted client cookies
+		if _, exists := util.CookieWhitelist[cookie.Name]; exists {
+			ctx.Logger().Debugf("Saving client cookie: %+v", cookie)
+			clientCookies[cookie.Name] = cookie
+		} else {
+			ctx.Logger().Debugf("NOT saving client cookie: %+v", cookie)
+		}
 	}
 	return &ClientHandler{
 		ctx:           ctx,
@@ -74,7 +80,7 @@ func (a *ClientHandler) doStatusPost(data interface{}, endpoint string, includeA
 	return false, nil
 }
 
-// Adds filtered headers from the client's original request to a sub-request
+// Adds whitelisted headers from the client's original request to a sub-request
 func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization bool) {
 	// clone host, per
 	req.Host = a.ctx.Request().Host
@@ -104,11 +110,15 @@ func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization boo
 	}
 }
 
-// Saves response cookies to ClientHandler, overwriting old ones with same name
+// Saves whitelisted response cookies to ClientHandler, overwriting old ones with same name
 func (a *ClientHandler) saveCookies(resp *http.Response) {
 	for _, cookie := range resp.Cookies() {
-		a.ctx.Logger().Debugf("Saving proxy cookie: %+v", cookie)
-		a.proxyCookies[cookie.Name] = cookie
+		if _, exists := util.CookieWhitelist[cookie.Name]; exists {
+			a.ctx.Logger().Debugf("Saving proxy cookie: %+v", cookie)
+			a.proxyCookies[cookie.Name] = cookie
+		} else {
+			a.ctx.Logger().Debugf("NOT saving proxy cookie: %+v", cookie)
+		}
 	}
 }
 
