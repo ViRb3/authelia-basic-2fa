@@ -5,9 +5,10 @@ var endpointFirstFactorUrl = "/api/firstfactor"
 var endpointTOTPUrl = "/api/secondfactor/totp"
 
 var (
-	FirstFactorUrl string
-	TOTPUrl        string
-	VerifyUrl      string
+	FirstFactorUrl    string
+	TOTPUrl           string
+	VerifyUrl         string
+	SessionCookieName string = "authelia_session"
 )
 
 // Builds actual Authelia URLs
