@@ -26,10 +26,10 @@ func NewClientHandler(ctx echo.Context) *ClientHandler {
 	for _, cookie := range ctx.Cookies() {
 		// ignore non-whitelisted client cookies
 		if _, exists := util.CookieWhitelist[cookie.Name]; exists {
-			ctx.Logger().Debugf("Saving client cookie: %+v", cookie)
+			util.SLogger.Debugf("Saving client cookie: %+v", cookie)
 			clientCookies[cookie.Name] = cookie
 		} else {
-			ctx.Logger().Debugf("NOT saving client cookie: %+v", cookie)
+			util.SLogger.Debugf("NOT saving client cookie: %+v", cookie)
 		}
 	}
 	return &ClientHandler{
@@ -93,7 +93,7 @@ func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization boo
 		}
 
 		if _, exists := util.HeaderWhitelist[keyStr]; exists {
-			a.ctx.Logger().Debugf("Restoring header: %s, %v", key, values)
+			util.SLogger.Debugf("Restoring header: %s, %v", key, values)
 
 			// Authelia expects Proxy-Authorization
 			// https://github.com/authelia/authelia/blob/829757d3bc8196d6520f24479370a9037fbdb4de/internal/handlers/handler_verify.go#L232
@@ -105,7 +105,7 @@ func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization boo
 				req.Header.Set(key, value)
 			}
 		} else {
-			a.ctx.Logger().Debugf("NOT restoring header: %s, %v", key, values)
+			util.SLogger.Debugf("NOT restoring header: %s, %v", key, values)
 		}
 	}
 }
@@ -114,10 +114,10 @@ func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization boo
 func (a *ClientHandler) saveCookies(resp *http.Response) {
 	for _, cookie := range resp.Cookies() {
 		if _, exists := util.CookieWhitelist[cookie.Name]; exists {
-			a.ctx.Logger().Debugf("Saving proxy cookie: %+v", cookie)
+			util.SLogger.Debugf("Saving proxy cookie: %+v", cookie)
 			a.proxyCookies[cookie.Name] = cookie
 		} else {
-			a.ctx.Logger().Debugf("NOT saving proxy cookie: %+v", cookie)
+			util.SLogger.Debugf("NOT saving proxy cookie: %+v", cookie)
 		}
 	}
 }
@@ -127,14 +127,14 @@ func (a *ClientHandler) restoreCookies(req *http.Request) {
 	for _, cookie := range a.clientCookies {
 		// allow proxyCookies to override clientCookies
 		if _, exists := a.proxyCookies[cookie.Name]; !exists {
-			a.ctx.Logger().Debugf("Restoring client cookie: %+v", cookie)
+			util.SLogger.Debugf("Restoring client cookie: %+v", cookie)
 			req.AddCookie(cookie)
 		} else {
-			a.ctx.Logger().Debugf("NOT restoring client cookie (proxy cookie override): %+v", cookie)
+			util.SLogger.Debugf("NOT restoring client cookie (proxy cookie override): %+v", cookie)
 		}
 	}
 	for _, cookie := range a.proxyCookies {
-		a.ctx.Logger().Debugf("Restoring proxy cookie: %+v", cookie)
+		util.SLogger.Debugf("Restoring proxy cookie: %+v", cookie)
 		req.AddCookie(cookie)
 	}
 }
