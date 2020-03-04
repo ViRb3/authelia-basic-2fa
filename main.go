@@ -36,18 +36,18 @@ func main() {
 
 func handleAuthentication(ctx echo.Context) error {
 	user := fmt.Sprint("User " + ctx.RealIP())
-	util.SLogger.Debug(user + "connected")
+	util.SLogger.Debug(user + " connected")
 	authenticated, err := checkAuthentication(ctx)
 	if err != nil {
-		util.SLogger.Error(user + "not authenticated")
+		util.SLogger.Error(user + " not authenticated")
 		util.SLogger.Error(err)
 		return ctx.NoContent(401)
 	}
 	if authenticated {
-		util.SLogger.Info(user + "authenticated")
+		util.SLogger.Info(user + " authenticated")
 		return ctx.NoContent(200)
 	}
-	util.SLogger.Info(user + "not authenticated")
+	util.SLogger.Info(user + " not authenticated")
 	return ctx.NoContent(401)
 }
 
