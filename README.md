@@ -6,9 +6,6 @@ This project allows you to use [Authelia](https://github.com/authelia/authelia)'
 custom credentials format described [below](#format). This allows you to use 2FA on clients and scenarios
 that demand basic auth, e.g. [webdav](https://en.wikipedia.org/wiki/WebDAV) network streaming.
 
-## Changes from v1
-This is a complete re-code of the original LUA script into a Go reverse proxy, fixing numerous compatibility and security issues. You are _strongly_ advised to upgrade. As an architectural bonus, you no longer need OpenResty or even nginx to use this project.
-
 ## Technical details
 2FA is achieved through basic auth by placing a reverse proxy (this project) before every authentication attempt with Authelia. Your requests will look like this:
 ```
