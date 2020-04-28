@@ -29,8 +29,7 @@ services:
       driver: journald
 
   authelia-basic-2fa: # port 8081
-    image: local/authelia-basic-2fa
-    build: ./authelia-basic-2fa
+    image: ViRb3/authelia-basic-2fa:2.0.12
     container_name: authelia-basic-2fa
     restart: unless-stopped
     logging:
