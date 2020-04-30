@@ -1,12 +1,9 @@
-name: CI
+name: Release
 
 on:
   push:
-    branches: [v2]
     tags:
       - "*"
-  pull_request:
-    branches: [v2]
 
 jobs:
   build:
@@ -17,12 +14,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.API_GITHUB_TOKEN }}
-
-      - name: Version
-        id: semantic
-        uses: cycjimmy/semantic-release-action@v2.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
 
       - name: Docker Prepare
         if: success() && startsWith(github.ref, 'refs/tags/')

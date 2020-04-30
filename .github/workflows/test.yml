@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  push:
+    branches: [v2]
+  pull_request:
+    branches: [v2]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.API_GITHUB_TOKEN }}
+
+      - name: Docker Prepare
+        if: success()
+        uses: crazy-max/ghaction-docker-buildx@v1.4.0
+
+      - name: Docker Build Test
+        if: success()
+        run: docker buildx build --load --tag test:test --file ./Dockerfile ./
+
+      - name: Version
+        if: success()
+        uses: cycjimmy/semantic-release-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
