@@ -41,12 +41,14 @@ jobs:
         env:
           REPO: virb3/authelia-basic-2fa
         run: |
-          export VERSION="${GITHUB_REF##*/v}"
+          . ./parse-version.sh
           docker buildx build \
             --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
             --push \
             --build-arg "VERSION=${VERSION}" \
             --tag "${REPO}:${VERSION}" \
+            --tag "${REPO}:${VERSION_MAJOR}" \
+            --tag "${REPO}:${VERSION_MINOR}" \
             --tag "${REPO}:latest" \
             --file ./Dockerfile ./
 
