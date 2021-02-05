@@ -10,7 +10,7 @@ FROM alpine:3.13.1
 
 WORKDIR /
 
-COPY --from=builder "/src/bin-release" "/authelia-basic-2fa"
+COPY --from=builder "/src/bin-release" "/"
 
-ENTRYPOINT ["/authelia-basic-2fa"]
+ENTRYPOINT ["/bin-release"]
 EXPOSE 8081
