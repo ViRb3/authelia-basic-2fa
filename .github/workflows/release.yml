@@ -7,7 +7,7 @@ on:
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout
@@ -15,35 +15,38 @@ jobs:
         with:
           token: ${{ secrets.API_GITHUB_TOKEN }}
 
-      - name: Docker Prepare
-        if: success()
-        uses: crazy-max/ghaction-docker-buildx@v1.4.0
+      - name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: ${{ github.repository }}
+          tag-semver: |
+            {{major}}
+            {{major}}.{{minor}}
+            {{major}}.{{minor}}.{{patch}}
+            {{version}}
 
-      - name: Docker Login
-        if: success()
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
-      - name: Docker Release
-        if: success()
-        run: |
-          . ./parse-repo.sh
-          export REPO="virb3/${REPO}"
-          docker buildx build \
-            --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
-            --push \
-            --build-arg "VERSION=${VERSION}" \
-            --tag "${REPO}:${VERSION}" \
-            --tag "${REPO}:${VERSION_MAJOR}" \
-            --tag "${REPO}:${VERSION_MINOR}" \
-            --tag "${REPO}:latest" \
-            --file ./Dockerfile ./
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
 
   binaries:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout
@@ -52,7 +55,9 @@ jobs:
           token: ${{ secrets.API_GITHUB_TOKEN }}
 
       - name: Binaries Release
-        if: success()
-        uses: goreleaser/goreleaser-action@v1.4.0
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
