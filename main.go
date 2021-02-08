@@ -5,7 +5,6 @@ import (
 	"authelia-basic-2fa/util"
 	"flag"
 	"fmt"
-
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap/zapcore"
 )
@@ -36,19 +35,24 @@ func main() {
 
 func handleAuthentication(ctx echo.Context) error {
 	user := fmt.Sprint("User " + ctx.RealIP())
+
 	util.SLogger.Debug(user + " connected")
 	authenticated, err := checkAuthentication(ctx)
 	if err != nil {
 		util.SLogger.Error(user + " not authenticated")
 		util.SLogger.Error(err)
-		return ctx.NoContent(401)
+		ctx.Response().Header().Set("WWW-Authenticate", "Basic realm='authelia-basic-2fa'")
+		ctx.Response().WriteHeader(401)
+		return err
 	}
 	if authenticated {
 		util.SLogger.Info(user + " authenticated")
 		return ctx.NoContent(200)
 	}
 	util.SLogger.Info(user + " not authenticated")
-	return ctx.NoContent(401)
+	ctx.Response().Header().Set("WWW-Authenticate", "Basic realm='authelia-basic-2fa'")
+	ctx.Response().WriteHeader(401)
+	return nil
 }
 
 func checkAuthentication(ctx echo.Context) (bool, error) {
