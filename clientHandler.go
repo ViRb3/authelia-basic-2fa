@@ -92,7 +92,7 @@ func (a *ClientHandler) cloneHeaders(req *http.Request, includeAuthorization boo
 			continue
 		}
 
-		if _, exists := util.HeaderWhitelist[keyStr]; exists {
+		if _, exists := util.HeaderClientWhitelist[keyStr]; exists {
 			util.SLogger.Debugf("Restoring header: %s, %v", key, values)
 
 			// Authelia expects Proxy-Authorization
@@ -164,27 +164,39 @@ func (a *ClientHandler) doRequest(
 }
 
 // Checks if the client has valid Authorization
-func (a *ClientHandler) checkAuthorization() (bool, error) {
+func (a *ClientHandler) checkAuthorization() (bool, map[string]string, error) {
 	if a.ctx.Request().Header.Get("authorization") == "" {
-		return false, nil
+		return false, nil, nil
 	}
 	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, true)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
-	return resp.StatusCode == 200, nil
+	returnHeaders := a.getServerReturnHeaders(resp)
+	return resp.StatusCode == 200, returnHeaders, nil
 }
 
 // Checks if the client has a valid Authelia session
-func (a *ClientHandler) checkSession() (bool, error) {
+func (a *ClientHandler) checkSession() (bool, map[string]string, error) {
 	if _, exists := a.clientCookies[authelia.SessionCookieName]; !exists {
 		if _, exists := a.proxyCookies[authelia.SessionCookieName]; !exists {
-			return false, nil
+			return false, nil, nil
 		}
 	}
 	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, false)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
-	return resp.StatusCode == 200, nil
+	returnHeaders := a.getServerReturnHeaders(resp)
+	return resp.StatusCode == 200, returnHeaders, nil
+}
+
+func (a *ClientHandler) getServerReturnHeaders(resp *http.Response) map[string]string {
+	returnHeaders := map[string]string{}
+	for key, values := range resp.Header {
+		if _, ok := util.HeaderServerWhitelist[strings.ToLower(key)]; ok {
+			returnHeaders[key] = values[0]
+		}
+	}
+	return returnHeaders
 }
