@@ -165,9 +165,6 @@ func (a *ClientHandler) doRequest(
 
 // Checks if the client has valid Authorization
 func (a *ClientHandler) checkAuthorization() (bool, map[string]string, error) {
-	if a.ctx.Request().Header.Get("authorization") == "" {
-		return false, nil, nil
-	}
 	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, true)
 	if err != nil {
 		return false, nil, err
@@ -178,11 +175,6 @@ func (a *ClientHandler) checkAuthorization() (bool, map[string]string, error) {
 
 // Checks if the client has a valid Authelia session
 func (a *ClientHandler) checkSession() (bool, map[string]string, error) {
-	if _, exists := a.clientCookies[authelia.SessionCookieName]; !exists {
-		if _, exists := a.proxyCookies[authelia.SessionCookieName]; !exists {
-			return false, nil, nil
-		}
-	}
 	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, false)
 	if err != nil {
 		return false, nil, err
