@@ -67,7 +67,7 @@ Run with argument `-help`:
 
 ## :warning: Security notes
 
-- Make sure you are setting all reverse proxy headers from [headerWhitelist.go](util/headerWhitelist.go) in your nginx configuration, as shown in [authelia-proxy.conf](docker/nginx/data/authelia-proxy.conf). This project will pass all the headers listed above from the client to Authelia, allowing an attacker to spoof them if nginx is not present.
+- Make sure you are setting all reverse proxy headers from [whitelists.go](util/whitelists.go) in your nginx configuration, as shown in [authelia-proxy.conf](docker/nginx/data/authelia-proxy.conf). This project will pass all the headers listed above from the client to Authelia, allowing an attacker to spoof them if nginx is not present.
 
 ## Other notes
 
