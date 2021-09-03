@@ -2,8 +2,20 @@ package util
 
 import (
 	"authelia-basic-2fa/authelia"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"strings"
 )
+
+var Logger *zap.Logger
+var SLogger *zap.SugaredLogger
+
+func InitializeLogger(logLevel zapcore.Level) {
+	config := zap.NewProductionConfig()
+	config.Level.SetLevel(logLevel)
+	Logger, _ = config.Build()
+	SLogger = Logger.Sugar()
+}
 
 // Cookies that should be passed to sub-requests to Authelia
 var CookieWhitelist = map[string]bool{}
