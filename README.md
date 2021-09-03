@@ -18,11 +18,11 @@ You ---> nginx (or other reverse proxy) ---> this reverse proxy --> Authelia
 
 This proxy will clone the client's request headers and cookies based on a whitelist, and use them to negotiate authentication with Authelia on the client's behalf.
 
-The proxy will first execute a sub-request to Authelia's `verify` endpoint to check if the client has a valid session cookie or authorization (e.g. basic auth). If that succeeds, code `200` is returned to the client directly.
+The proxy will first execute a sub-request to Authelia's `verify` endpoint to check if the client has a valid session cookie or authorization (e.g. basic auth). If that succeeds, code `2xx` is returned to the client directly.
 
-If that fails, the proxy will attempt to detect if the special credentials format is being used. If yes, it will decode the credentials (which include the TOTP) and execute standard Authelia 2FA TOTP authentication. The proxy will then verify the newly obtained session, and, if valid, return the session cookie to the client through a `Set-Cookie` header, along with a status code `200`.
+If that fails, the proxy will attempt to detect if the special credentials format is being used. If yes, it will decode the credentials (which include the TOTP) and execute standard Authelia 2FA TOTP authentication. The proxy will then verify the newly obtained session, and, if valid, return the session cookie to the client through a `Set-Cookie` header, along with a status code `2xx`.
 
-In all other cases, including when the client does not use the special credentials format or the format is invalid, this proxy will return a status code `401`.
+In all other cases, including when the client does not use the special credentials format or the format is invalid, this proxy will return a `non-2xx` code.
 
 ## Format
 

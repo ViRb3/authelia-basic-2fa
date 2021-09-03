@@ -40,7 +40,7 @@ func NewClientHandler(ctx echo.Context) *ClientHandler {
 }
 
 // Performs first factor authentication with Authelia and returns the JSON response status
-func (a *ClientHandler) checkFirstFactor(credentials *Credentials) (bool, error) {
+func (a *ClientHandler) checkFirstFactor(credentials *Credentials) (int, error) {
 	return a.doStatusPost(&authelia.FirstFactorRequest{
 		Username:       credentials.Username,
 		Password:       credentials.Password,
@@ -49,35 +49,38 @@ func (a *ClientHandler) checkFirstFactor(credentials *Credentials) (bool, error)
 }
 
 // Performs TOTP second factor authentication with Authelia and returns the JSON response status
-func (a *ClientHandler) checkTOTP(credentials *Credentials) (bool, error) {
+func (a *ClientHandler) checkTOTP(credentials *Credentials) (int, error) {
 	return a.doStatusPost(&authelia.TOTPRequest{
 		Token: credentials.TOTP,
 	}, authelia.TOTPUrl, false)
 }
 
 // Performs a POST request to an Authelia endpoint and returns the JSON response status
-func (a *ClientHandler) doStatusPost(data interface{}, endpoint string, includeAuthorization bool) (bool, error) {
+func (a *ClientHandler) doStatusPost(data interface{}, endpoint string, includeAuthorization bool) (int, error) {
 	jsonBody, err := json.Marshal(data)
 	if err != nil {
-		return false, err
+		return 0, err
 	}
-
 	resp, err := a.doRequest(endpoint, "POST", jsonBody, includeAuthorization)
-	if err != nil || resp.StatusCode != 200 {
-		return false, err
+	if err != nil {
+		return 0, err
+	}
+	if util.IsBad(resp.StatusCode) {
+		return resp.StatusCode, nil
 	}
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return false, err
+		return 0, err
 	}
 	statusResponse := authelia.StatusResponse{}
 	if err = json.Unmarshal(bodyBytes, &statusResponse); err != nil {
-		return false, err
+		return 0, err
 	}
 	if statusResponse.Status == "OK" {
-		return true, nil
+		return resp.StatusCode, nil
+	} else {
+		return 500, nil
 	}
-	return false, nil
 }
 
 // Adds whitelisted headers from the client's original request to a sub-request
@@ -164,23 +167,23 @@ func (a *ClientHandler) doRequest(
 }
 
 // Checks if the client has valid Authorization
-func (a *ClientHandler) checkAuthorization() (bool, map[string]string, error) {
+func (a *ClientHandler) checkAuthorization() (int, map[string]string, error) {
 	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, true)
 	if err != nil {
-		return false, nil, err
+		return 0, nil, err
 	}
 	returnHeaders := a.getServerReturnHeaders(resp)
-	return resp.StatusCode == 200, returnHeaders, nil
+	return resp.StatusCode, returnHeaders, nil
 }
 
 // Checks if the client has a valid Authelia session
-func (a *ClientHandler) checkSession() (bool, map[string]string, error) {
+func (a *ClientHandler) checkSession() (int, map[string]string, error) {
 	resp, err := a.doRequest(authelia.VerifyUrl, "GET", nil, false)
 	if err != nil {
-		return false, nil, err
+		return 0, nil, err
 	}
 	returnHeaders := a.getServerReturnHeaders(resp)
-	return resp.StatusCode == 200, returnHeaders, nil
+	return resp.StatusCode, returnHeaders, nil
 }
 
 func (a *ClientHandler) getServerReturnHeaders(resp *http.Response) map[string]string {

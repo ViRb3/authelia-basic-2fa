@@ -67,3 +67,11 @@ func init() {
 		HeaderServerWhitelist[strings.ToLower(header)] = true
 	}
 }
+
+func IsGood(code int) bool {
+	return code >= 200 && code < 300
+}
+
+func IsBad(code int) bool {
+	return !IsGood(code)
+}

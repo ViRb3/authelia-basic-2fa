@@ -37,24 +37,25 @@ func main() {
 func handleAuthentication(ctx echo.Context) error {
 	user := fmt.Sprint("User " + ctx.RealIP())
 	util.SLogger.Debug(user + " connected")
-	authenticated, returnHeaders, err := checkAuthentication(ctx)
+	statusCode, returnHeaders, err := checkAuthentication(ctx)
 	if err != nil {
 		util.SLogger.Error(user + " not authenticated")
 		util.SLogger.Error(err)
-		return ctx.NoContent(401)
+		return ctx.NoContent(500)
 	}
-	if authenticated {
+	if util.IsGood(statusCode) {
 		util.SLogger.Info(user + " authenticated")
 		for key, value := range returnHeaders {
 			ctx.Response().Header().Set(key, value)
 		}
-		return ctx.NoContent(200)
+		return ctx.NoContent(statusCode)
+	} else {
+		util.SLogger.Info(user + " not authenticated")
+		return ctx.NoContent(statusCode)
 	}
-	util.SLogger.Info(user + " not authenticated")
-	return ctx.NoContent(401)
 }
 
-func checkAuthentication(ctx echo.Context) (bool, map[string]string, error) {
+func checkAuthentication(ctx echo.Context) (int, map[string]string, error) {
 	clientHandler := NewClientHandler(ctx)
 	// apply all proxyCookies to the response, e.g. newly created Authelia session
 	defer func() {
@@ -65,39 +66,50 @@ func checkAuthentication(ctx echo.Context) (bool, map[string]string, error) {
 	}()
 
 	util.SLogger.Debug("Checking if user session is already valid")
-	sessionValid, returnHeaders, err := clientHandler.checkSession()
+	statusCode, returnHeaders, err := clientHandler.checkSession()
 	if err != nil {
-		return false, nil, err
+		return 0, nil, err
 	}
-	if sessionValid {
+	if util.IsGood(statusCode) {
 		util.SLogger.Debug("User session was valid")
-		return true, returnHeaders, nil
+		return statusCode, returnHeaders, nil
+	} else if statusCode != 401 {
+		return statusCode, nil, nil
 	}
 
 	util.SLogger.Debug("Checking if user authorization is valid")
-	authorizationValid, returnHeaders, err := clientHandler.checkAuthorization()
+	statusCode, returnHeaders, err = clientHandler.checkAuthorization()
 	if err != nil {
-		return false, nil, err
+		return 0, nil, err
 	}
-	if authorizationValid {
+	if util.IsGood(statusCode) {
 		util.SLogger.Debug("Authorization was valid")
-		return true, returnHeaders, nil
+		return statusCode, returnHeaders, nil
+	} else if statusCode != 401 {
+		return statusCode, nil, nil
 	}
 
 	util.SLogger.Debug("Performing manual authentication")
 	credentials, err := DecodeCredentials(ctx)
 	if err != nil {
-		return false, nil, err
+		util.SLogger.Debug(err)
+		return 401, nil, nil
 	}
 	util.SLogger.Debug("Checking first factor authentication")
-	result, err := clientHandler.checkFirstFactor(credentials)
-	if err != nil || !result {
-		return false, nil, err
+	statusCode, err = clientHandler.checkFirstFactor(credentials)
+	if err != nil {
+		return 0, nil, err
+	}
+	if util.IsBad(statusCode) {
+		return statusCode, nil, nil
 	}
 	util.SLogger.Debug("Checking TOTP authentication")
-	result, err = clientHandler.checkTOTP(credentials)
-	if err != nil || !result {
-		return false, nil, err
+	statusCode, err = clientHandler.checkTOTP(credentials)
+	if err != nil {
+		return 0, nil, err
+	}
+	if util.IsBad(statusCode) {
+		return statusCode, nil, nil
 	}
 
 	util.SLogger.Debug("Checking if new session is valid")
