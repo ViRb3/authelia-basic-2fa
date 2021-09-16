@@ -65,6 +65,7 @@ func (a *ClientHandler) doStatusPost(data interface{}, endpoint string, includeA
 	if err != nil {
 		return 0, err
 	}
+	defer resp.Body.Close()
 	if util.IsBad(resp.StatusCode) {
 		return resp.StatusCode, nil
 	}
@@ -142,7 +143,7 @@ func (a *ClientHandler) restoreCookies(req *http.Request) {
 	}
 }
 
-// Performs a request to an Authelia endpoint
+// Performs a request to an Authelia endpoint. Don't forget to close the response body.
 func (a *ClientHandler) doRequest(
 	requestUri string, requestMethod string, jsonBody []byte, includeAuthorization bool) (*http.Response, error) {
 	req, err := http.NewRequest(requestMethod, requestUri, bytes.NewReader(jsonBody))
@@ -172,6 +173,7 @@ func (a *ClientHandler) checkAuthorization() (int, map[string]string, error) {
 	if err != nil {
 		return 0, nil, err
 	}
+	defer resp.Body.Close()
 	returnHeaders := a.getServerReturnHeaders(resp)
 	return resp.StatusCode, returnHeaders, nil
 }
@@ -182,6 +184,7 @@ func (a *ClientHandler) checkSession() (int, map[string]string, error) {
 	if err != nil {
 		return 0, nil, err
 	}
+	defer resp.Body.Close()
 	returnHeaders := a.getServerReturnHeaders(resp)
 	return resp.StatusCode, returnHeaders, nil
 }
