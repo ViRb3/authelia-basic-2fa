@@ -6,7 +6,7 @@ COPY . .
 RUN go mod download && \
     CGO_ENABLED=0 go build -ldflags="-s -w" -o "authelia-basic-2fa"
 
-FROM alpine:3.14.2
+FROM alpine:3.14.3
 
 WORKDIR /
 
