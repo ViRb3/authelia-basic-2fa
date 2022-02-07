@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/labstack/echo/v4 v4.6.1
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.21.0
 )
 
 require (
