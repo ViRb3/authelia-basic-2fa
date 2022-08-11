@@ -3,7 +3,7 @@ module authelia-basic-2fa
 go 1.17
 
 require (
-	github.com/labstack/echo/v4 v4.7.2
+	github.com/labstack/echo/v4 v4.8.0
 	go.uber.org/zap v1.21.0
 )
 
