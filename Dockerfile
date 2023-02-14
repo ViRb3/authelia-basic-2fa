@@ -7,7 +7,7 @@ RUN apk add --no-cache git && \
     go mod download && \
     CGO_ENABLED=0 go build -ldflags="-s -w" -o "authelia-basic-2fa"
 
-FROM alpine:3.16.2
+FROM alpine:3.17.2
 
 WORKDIR /
 
